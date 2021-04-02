@@ -16,6 +16,7 @@ export class MetadataStorage {
   private _transformMetadatas = new Map<Function, Map<string, TransformMetadata[]>>();
   private _exposeMetadatas = new Map<Function, Map<string, ExposeMetadata>>();
   private _excludeMetadatas = new Map<Function, Map<string, ExcludeMetadata>>();
+  private _aliasMetadatas = new Map<Function, Map<string, AliasMetadata>>();
   private _ancestorsMap = new Map<Function, Function[]>();
 
   // -------------------------------------------------------------------------
@@ -53,6 +54,13 @@ export class MetadataStorage {
     this._excludeMetadatas.get(metadata.target).set(metadata.propertyName, metadata);
   }
 
+  addAliasMetadata(metadata: AliasMetadata): void {
+    if (!this._aliasMetadatas.has(metadata.target)) {
+      this._aliasMetadatas.set(metadata.target, new Map<string, AliasMetadata>());
+    }
+    this._aliasMetadatas.get(metadata.target).set(metadata.propertyName, metadata);
+  }
+
   // -------------------------------------------------------------------------
   // Public Methods
   // -------------------------------------------------------------------------
@@ -88,6 +96,16 @@ export class MetadataStorage {
     return this.findMetadata(this._exposeMetadatas, target, propertyName);
   }
 
+  findAliasMetadata(target: Function, propertyName: string): AliasMetadata {
+    return this.findMetadata(this._aliasMetadatas, target, propertyName);
+  }
+
+  findAliasMetadataByCustomName(target: Function, name: string): AliasMetadata {
+    return this.getAliasMetadatas(target).find(metadata => {
+      return metadata.options && metadata.options.name === name;
+    });
+  }
+
   findExposeMetadataByCustomName(target: Function, name: string): ExposeMetadata {
     return this.getExposedMetadatas(target).find(metadata => {
       return metadata.options && metadata.options.name === name;
@@ -109,6 +127,10 @@ export class MetadataStorage {
 
   getExposedMetadatas(target: Function): ExposeMetadata[] {
     return this.getMetadata(this._exposeMetadatas, target);
+  }
+
+  getAliasMetadatas(target: Function): AliasMetadata[] {
+    return this.getMetadata(this._aliasMetadatas, target);
   }
 
   getExcludedMetadatas(target: Function): ExcludeMetadata[] {
