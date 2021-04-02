@@ -159,6 +159,10 @@ export class TransformOperationExecutor {
               propertyName = exposeMetadata.propertyName;
               newValueKey = exposeMetadata.propertyName;
             }
+            const aliasMetadata = defaultMetadataStorage.findAliasMetadataByCustomName(targetType as Function, key);
+            if (aliasMetadata && aliasMetadata.options && aliasMetadata.options.name && this.options.useAliases) {
+              newValueKey = aliasMetadata.propertyName;
+            }
           } else if (
             this.transformationType === TransformationType.CLASS_TO_PLAIN ||
             this.transformationType === TransformationType.CLASS_TO_CLASS
@@ -166,6 +170,16 @@ export class TransformOperationExecutor {
             const exposeMetadata = defaultMetadataStorage.findExposeMetadata(targetType as Function, key);
             if (exposeMetadata && exposeMetadata.options && exposeMetadata.options.name) {
               newValueKey = exposeMetadata.options.name;
+            }
+            const aliasMetadata = defaultMetadataStorage.findAliasMetadata(targetType as Function, key);
+            if (
+              this.transformationType === TransformationType.CLASS_TO_PLAIN &&
+              aliasMetadata &&
+              aliasMetadata.options &&
+              aliasMetadata.options.name &&
+              this.options.useAliases
+            ) {
+              newValueKey = aliasMetadata.options.name;
             }
           }
         }
