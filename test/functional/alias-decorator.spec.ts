@@ -1,7 +1,7 @@
 import 'reflect-metadata';
-import { classToPlain, plainToClass } from '../../src/index';
+import {classToPlain, plainToClass, Type} from '../../src/index';
 import { defaultMetadataStorage } from '../../src/storage';
-import { Alias } from '../../src/decorators/alias.decorator';
+import { Alias } from '../../src/decorators';
 
 describe('alias functionality', () => {
   it('Tests alias instanceToPlain', () => {
@@ -48,5 +48,36 @@ describe('alias functionality', () => {
 
     expect(instance.id).toEqual(123);
     expect(instance.firstName).toEqual('Alex');
+  });
+
+  it.only('Tests alias plainToInstance, for nested field', () => {
+    defaultMetadataStorage.clear();
+
+    class User {
+      id: number;
+
+      @Alias({ name: 'fn' })
+      firstName: string;
+    }
+
+    class Order {
+      @Alias({name: 'u'})
+      @Type(() => User)
+      user: User;
+    }
+
+    const plain = {
+      u: {
+        id: 123,
+        fn: 'Alex',
+      }
+    };
+
+    const instance = plainToClass(Order, plain, {
+      useAliases: true,
+    });
+
+    expect(instance.user.id).toEqual(123);
+    expect(instance.user.firstName).toStrictEqual('Alex');
   });
 });

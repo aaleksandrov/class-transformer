@@ -1,5 +1,5 @@
 import { defaultMetadataStorage } from './storage';
-import { TypeHelpOptions, TypeOptions, ClassTransformOptions, TypeMetadata } from './interfaces';
+import {TypeHelpOptions, TypeOptions, ClassTransformOptions, TypeMetadata, AliasMetadata} from './interfaces';
 import { TransformationType } from './enums';
 import { getGlobal } from './utils';
 
@@ -200,7 +200,17 @@ export class TransformOperationExecutor {
         if (targetType && isMap) {
           type = targetType;
         } else if (targetType) {
-          const metadata = defaultMetadataStorage.findTypeMetadata(targetType as Function, propertyName);
+          let metadata;
+          if (this.options.useAliases) {
+            const am = defaultMetadataStorage.findAliasMetadataByCustomName(targetType as Function, propertyName);
+            if (am && am.propertyName) {
+              metadata = defaultMetadataStorage.findTypeMetadata(targetType as Function, am.propertyName);
+            } else {
+              metadata = defaultMetadataStorage.findTypeMetadata(targetType as Function, propertyName);
+            }
+          } else {
+            metadata = defaultMetadataStorage.findTypeMetadata(targetType as Function, propertyName);
+          }
           if (metadata) {
             const options: TypeHelpOptions = { newObject: newValue, object: value, property: propertyName };
             const newType = metadata.typeFunction ? metadata.typeFunction(options) : metadata.reflectedType;

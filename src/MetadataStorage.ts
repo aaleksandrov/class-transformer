@@ -180,6 +180,7 @@ export class MetadataStorage {
     this._typeMetadatas.clear();
     this._exposeMetadatas.clear();
     this._excludeMetadatas.clear();
+    this._aliasMetadatas.clear();
     this._ancestorsMap.clear();
   }
 
